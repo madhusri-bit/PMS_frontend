@@ -10,6 +10,7 @@ import RoleProtectedRoute from "./components/RoleProtectedRoute";
 // Pages
 import Login from "./pages/Login";
 import Home from "./pages/Home";
+import Landing from "./pages/Landing";
 import Products from "./pages/Products";
 import Categories from "./pages/Categories";
 import Suppliers from "./pages/Suppliers";
@@ -27,11 +28,20 @@ const App = () => (
       <AuthProvider>
         <Navbar />
         <Routes>
-          {/* Public */}
+
+          {/* Public Landing Page */}
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
 
-          {/* Protected Home */}
-          <Route path="/" element={<Home />} />
+          {/* Protected Home (Dashboard) */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Products */}
           <Route

@@ -26,7 +26,7 @@ const Login = () => {
       const { data } = await api.post("/auth/login", form); // backend: /api/auth/login
       // data = { token, role: 'ADMIN'|'MANAGER'|'EMPLOYEE', username }
       login({ token: data.token, role: data.role, username: data.username });
-      const dest = loc.state?.from?.pathname || "/";
+      const dest = loc.state?.from?.pathname || "/dashboard";
       navigate(dest, { replace: true });
     } catch {
       setErr("Invalid credentials");

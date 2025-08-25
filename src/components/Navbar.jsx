@@ -121,7 +121,7 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 const NAVIGATION_ITEMS = [
   {
     title: "Home",
-    path: "/",
+    path: "/dashboard",
     icon: <HomeIcon />,
     roles: ["ADMIN", "MANAGER", "EMPLOYEE"],
   },

@@ -1,5 +1,224 @@
+// // src/pages/Home.jsx
+// import React, { useEffect, useState } from "react";
+// import { useAuth } from "../context/AuthContext";
+// import {
+//   Container,
+//   Grid,
+//   Card,
+//   CardContent,
+//   Typography,
+//   CircularProgress,
+// } from "@mui/material";
+// import {
+//   BarChart,
+//   Bar,
+//   XAxis,
+//   YAxis,
+//   Tooltip,
+//   ResponsiveContainer,
+//   PieChart,
+//   Pie,
+//   Cell,
+// } from "recharts";
+// import api from "../api/axios";
+
+// const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+
+// const Home = () => {
+//   const { user } = useAuth(); // ⬅️ get user from context
+//   const role = user?.role;
+//   const [products, setProducts] = useState([]);
+//   const [categories, setCategories] = useState([]);
+//   const [suppliers, setSuppliers] = useState([]);
+//   const [users, setUsers] = useState([]);
+//   const [loading, setLoading] = useState(true);
+
+//   // useEffect(() => {
+//   //   const fetchAll = async () => {
+//   //     try {
+//   //       const resProducts = await api.get("/products");
+//   //       const resCategories = await api.get("/categories");
+//   //       const resSuppliers = await api.get("/suppliers");
+//   //       const resUsers = await api.get("/users");
+
+//   //       setProducts(resProducts.data);
+//   //       setCategories(resCategories.data);
+//   //       setSuppliers(resSuppliers.data);
+//   //       setUsers(resUsers.data);
+//   //     } catch (error) {
+//   //       console.error("Error fetching data:", error);
+//   //     } finally {
+//   //       setLoading(false);
+//   //     }
+//   //   };
+
+//   //   fetchAll();
+//   // }, []);
+
+//   useEffect(() => {
+//     const fetchAll = async () => {
+//       try {
+//         const resProducts = await api.get("/products");
+//         setProducts(resProducts.data);
+
+//         if (role === "ADMIN" || role === "MANAGER") {
+//           const resCategories = await api.get("/categories");
+//           const resSuppliers = await api.get("/suppliers");
+//           setCategories(resCategories.data);
+//           setSuppliers(resSuppliers.data);
+//         }
+
+//         if (role === "ADMIN") {
+//           const resUsers = await api.get("/users");
+//           setUsers(resUsers.data);
+//         }
+//       } catch (error) {
+//         console.error("Error fetching data:", error);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchAll();
+//   }, [role]);
+
+//   if (loading) {
+//     return (
+//       <Container sx={{ textAlign: "center", mt: 10 }}>
+//         <CircularProgress />
+//         <Typography variant="h6" sx={{ mt: 2 }}>
+//           Loading Home...
+//         </Typography>
+//       </Container>
+//     );
+//   }
+
+//   // Prepare category distribution for Pie chart
+//   const categoryDistribution = categories.map((cat) => ({
+//     name: cat.name,
+//     value: products.filter((p) => p.category?.id === cat.id).length,
+//   }));
+
+//   // Prepare supplier-product count for Bar chart
+//   const supplierDistribution = suppliers.map((sup) => ({
+//     name: sup.name,
+//     count: products.filter((p) => p.supplier?.id === sup.id).length,
+//   }));
+
+//   return (
+//     <Container sx={{ mt: 4 }}>
+//       <Typography variant="h4" gutterBottom>
+//         Home
+//       </Typography>
+
+//       {/* Stat Cards */}
+//       <Grid container spacing={3}>
+//         <Grid item xs={12} sm={6} md={3}>
+//           <Card sx={{ bgcolor: "#e3f2fd" }}>
+//             <CardContent>
+//               <Typography variant="h6">Products</Typography>
+//               <Typography variant="h4">{products.length}</Typography>
+//             </CardContent>
+//           </Card>
+//         </Grid>
+
+//         {(role === "ADMIN" || role === "MANAGER") && (
+//           <>
+//             <Grid item xs={12} sm={6} md={3}>
+//               <Card sx={{ bgcolor: "#fce4ec" }}>
+//                 <CardContent>
+//                   <Typography variant="h6">Categories</Typography>
+//                   <Typography variant="h4">{categories.length}</Typography>
+//                 </CardContent>
+//               </Card>
+//             </Grid>
+//             <Grid item xs={12} sm={6} md={3}>
+//               <Card sx={{ bgcolor: "#e8f5e9" }}>
+//                 <CardContent>
+//                   <Typography variant="h6">Suppliers</Typography>
+//                   <Typography variant="h4">{suppliers.length}</Typography>
+//                 </CardContent>
+//               </Card>
+//             </Grid>
+//           </>
+//         )}
+
+//         {role === "ADMIN" && (
+//           <Grid item xs={12} sm={6} md={3}>
+//             <Card sx={{ bgcolor: "#fff3e0" }}>
+//               <CardContent>
+//                 <Typography variant="h6">Users</Typography>
+//                 <Typography variant="h4">{users.length}</Typography>
+//               </CardContent>
+//             </Card>
+//           </Grid>
+//         )}
+//       </Grid>
+
+//       {/* Charts */}
+//       {(role === "ADMIN" || role === "MANAGER") && (
+//         <Grid container spacing={4} sx={{ mt: 3 }}>
+//           {/* Category Distribution - Pie */}
+//           <Grid item xs={12} md={6}>
+//             <Card>
+//               <CardContent>
+//                 <Typography variant="h6" gutterBottom>
+//                   Category Distribution
+//                 </Typography>
+//                 <ResponsiveContainer width="100%" height={300}>
+//                   <PieChart>
+//                     <Pie
+//                       data={categoryDistribution}
+//                       dataKey="value"
+//                       nameKey="name"
+//                       cx="50%"
+//                       cy="50%"
+//                       outerRadius={100}
+//                       label
+//                     >
+//                       {categoryDistribution.map((entry, index) => (
+//                         <Cell
+//                           key={`cell-${index}`}
+//                           fill={COLORS[index % COLORS.length]}
+//                         />
+//                       ))}
+//                     </Pie>
+//                     <Tooltip />
+//                   </PieChart>
+//                 </ResponsiveContainer>
+//               </CardContent>
+//             </Card>
+//           </Grid>
+
+//           {/* Supplier vs Products - Bar */}
+//           <Grid item xs={12} md={6}>
+//             <Card>
+//               <CardContent>
+//                 <Typography variant="h6" gutterBottom>
+//                   Products per Supplier
+//                 </Typography>
+//                 <ResponsiveContainer width="100%" height={300}>
+//                   <BarChart data={supplierDistribution}>
+//                     <XAxis dataKey="name" />
+//                     <YAxis />
+//                     <Tooltip />
+//                     <Bar dataKey="count" fill="#8884d8" />
+//                   </BarChart>
+//                 </ResponsiveContainer>
+//               </CardContent>
+//             </Card>
+//           </Grid>
+//         </Grid>
+//       )}
+//     </Container>
+//   );
+// };
+
+// export default Home;
 // src/pages/Home.jsx
-import React, { useMemo } from "react";
+// src/pages/Home.jsx
+// src/pages/Home.jsx
+import React, { useEffect, useState, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import {
   Container,
@@ -34,6 +253,7 @@ import {
   Group,
   Warning,
 } from "@mui/icons-material";
+import api from "../api/axios";
 
 const CHART_COLORS = ["#2563eb", "#16a34a", "#dc2626", "#ca8a04", "#9333ea"];
 
@@ -43,74 +263,97 @@ const ROLE_PERMISSIONS = {
   EMPLOYEE: ["products"],
 };
 
-// Dummy Data
-const STATIC_DATA = {
-  products: [
-    {
-      id: 1,
-      name: "Laptop",
-      category: { id: 1, name: "Electronics" },
-      supplier: { id: 1, name: "Supplier A" },
-      inventory: { stockLevel: 5, minStockLevel: 10 },
-      createdAt: "2025-08-01",
-    },
-    {
-      id: 2,
-      name: "Shampoo",
-      category: { id: 2, name: "Cosmetics" },
-      supplier: { id: 2, name: "Supplier B" },
-      inventory: { stockLevel: 20, minStockLevel: 5 },
-      createdAt: "2025-08-10",
-    },
-    {
-      id: 3,
-      name: "Tablet",
-      category: { id: 1, name: "Electronics" },
-      supplier: { id: 1, name: "Supplier A" },
-      inventory: { stockLevel: 2, minStockLevel: 5 },
-      createdAt: "2025-08-15",
-    },
-  ],
-  categories: [
-    { id: 1, name: "Electronics" },
-    { id: 2, name: "Cosmetics" },
-  ],
-  suppliers: [
-    { id: 1, name: "Supplier A" },
-    { id: 2, name: "Supplier B" },
-  ],
-  users: [
-    { id: 1, username: "AdminUser" },
-    { id: 2, username: "ManagerUser" },
-  ],
-};
-
 const Home = () => {
   const { user } = useAuth();
-  const role = user?.role || "ADMIN"; // default ADMIN for testing
+  const role = user?.role;
+
+  const [data, setData] = useState({
+    products: [],
+    categories: [],
+    suppliers: [],
+    users: [],
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const permissions = ROLE_PERMISSIONS[role] || [];
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const requests = [];
+        const newData = {};
+
+        if (permissions.includes("products")) {
+          requests.push(
+            api.get("/products").then((res) => {
+              newData.products = res.data;
+            })
+          );
+        }
+
+        if (permissions.includes("categories")) {
+          requests.push(
+            api.get("/categories").then((res) => {
+              newData.categories = res.data;
+            })
+          );
+        }
+
+        if (permissions.includes("suppliers")) {
+          requests.push(
+            api.get("/suppliers").then((res) => {
+              newData.suppliers = res.data;
+            })
+          );
+        }
+
+        if (permissions.includes("users")) {
+          requests.push(
+            api.get("/users").then((res) => {
+              newData.users = res.data;
+            })
+          );
+        }
+
+        await Promise.all(requests);
+        setData(newData);
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err);
+        setError("Failed to load dashboard data. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [role]);
+  console.log("User in Home:", user);
 
   // analytics
   const analytics = useMemo(() => {
-    const { products, categories, suppliers } = STATIC_DATA;
+    const { products, categories, suppliers } = data;
 
     const categoryDistribution =
-      categories.map((category, i) => ({
+      categories?.map((category, i) => ({
         name: category.name,
         value:
-          products.filter((p) => p.category?.id === category.id).length || 0,
+          products?.filter((p) => p.category?.id === category.id).length || 0,
         color: CHART_COLORS[i % CHART_COLORS.length],
       })) || [];
 
     const supplierDistribution =
-      suppliers.map((supplier) => ({
+      suppliers?.map((supplier) => ({
         name: supplier.name,
         count:
-          products.filter((p) => p.supplier?.id === supplier.id).length || 0,
+          products?.filter((p) => p.supplier?.id === supplier.id).length || 0,
       })) || [];
 
     const lowStockProducts =
-      products.filter(
+      products?.filter(
         (p) => p.inventory && p.inventory.stockLevel < p.inventory.minStockLevel
       ) || [];
 
@@ -124,22 +367,76 @@ const Home = () => {
       lowStockProducts,
       recentProducts,
     };
-  }, []);
+  }, [data]);
+
+  if (loading) {
+    return (
+      <Container
+        maxWidth="lg"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "60vh",
+          textAlign: "center",
+        }}
+      >
+        <CircularProgress size={60} thickness={4} />
+        <Typography
+          variant="h6"
+          sx={{
+            mt: 3,
+            color: "text.secondary",
+            fontWeight: 400,
+          }}
+        >
+          Loading Dashboard...
+        </Typography>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 4,
+            textAlign: "center",
+            bgcolor: "error.light",
+            color: "error.contrastText",
+          }}
+        >
+          <Typography variant="h6">{error}</Typography>
+        </Paper>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Page Header */}
+
       <Box sx={{ mb: 4 }}>
         <Typography
           variant="h3"
           component="h1"
-          sx={{ fontWeight: 600, color: "text.primary", mb: 1 }}
+          sx={{
+            fontWeight: 600,
+            color: "text.primary",
+            mb: 1,
+          }}
         >
           Dashboard
         </Typography>
         <Typography
           variant="subtitle1"
-          sx={{ color: "text.secondary", fontSize: "1.1rem" }}
+          sx={{
+            color: "text.secondary",
+            fontSize: "1.1rem",
+          }}
         >
           Welcome back, {user?.username || "User"}
         </Typography>
@@ -149,7 +446,7 @@ const Home = () => {
       {/* Stats Cards */}
       <StatisticsSection
         role={role}
-        data={STATIC_DATA}
+        data={data}
         lowStockCount={analytics.lowStockProducts.length}
       />
 
@@ -263,7 +560,11 @@ const StatisticsSection = ({ role, data, lowStockCount }) => {
                   </Typography>
                   <Typography
                     variant="body2"
-                    sx={{ color: "text.secondary", mt: 0.5, fontWeight: 500 }}
+                    sx={{
+                      color: "text.secondary",
+                      mt: 0.5,
+                      fontWeight: 500,
+                    }}
                   >
                     {stat.title}
                   </Typography>
